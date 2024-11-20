@@ -1,0 +1,7 @@
+log
+logs
+go.sum
+.env
+bin
+.vscode
+.DS_Store
