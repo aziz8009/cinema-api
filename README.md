@@ -1,0 +1,3 @@
+# CINEMA APP
+
+## Getting started
