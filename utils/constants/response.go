@@ -48,3 +48,12 @@ const (
 	MESSAGE_FORBIDDEN              = "Forbidden"
 	MESSAGE_CONFLICT               = "Conflict"
 )
+
+func GetCustomResponse(status, message string, data interface{}, errors []string) DefaultResponse {
+	return DefaultResponse{
+		Status:  status,
+		Message: message,
+		Data:    data,
+		Errors:  errors,
+	}
+}

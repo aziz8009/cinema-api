@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"errors"
+	"log"
 	"net/http"
 	"strings"
 
@@ -20,15 +22,23 @@ func (cv *DataValidator) Validate(i interface{}) error {
 
 func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+
+		ctx := c.Request().Context()
+
 		token := c.Request().Header.Get("Authorization")
 		if token == "" {
-			return c.JSON(http.StatusUnauthorized, map[string]string{"error": "missing or invalid token"})
+			log.Println(ctx, "Empty Authorization Token", token)
+			return c.JSON(http.StatusUnauthorized, constants.GetCustomResponse("4010", "empty token", nil, []string{errors.New("empty authorization header").Error()}))
 		}
 
-		_, err := utils.ParseToken(token)
+		userAuth, err := utils.ParseToken(token)
+
 		if err != nil {
+			log.Println(ctx, "Invalid Token Format", token)
 			return c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid token"})
 		}
+
+		c.Set("user_auth", userAuth)
 
 		return next(c)
 	}
