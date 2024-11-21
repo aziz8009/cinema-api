@@ -31,10 +31,19 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return c.JSON(http.StatusUnauthorized, constants.GetCustomResponse("4010", "empty token", nil, []string{errors.New("empty authorization header").Error()}))
 		}
 
-		userAuth, err := utils.ParseToken(token)
+		tokenParts := strings.Split(token, " ")
+
+		if len(tokenParts) != 2 || strings.ToLower(tokenParts[0]) != "bearer" {
+			log.Println(ctx, "Invalid Token Format", token)
+			return c.JSON(http.StatusUnauthorized, constants.GetCustomResponse("4010", "invalid token format", nil, []string{errors.New("invalid token format").Error()}))
+		}
+
+		tokenStr := tokenParts[1]
+
+		userAuth, err := utils.ParseToken(tokenStr)
 
 		if err != nil {
-			log.Println(ctx, "Invalid Token Format", token)
+			log.Println(ctx, "Invalid Token Format", err)
 			return c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid token"})
 		}
 

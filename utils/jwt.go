@@ -2,17 +2,19 @@ package utils
 
 import (
 	"os"
+	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 )
 
-var secretKey = os.Getenv("JWT_SECRET_KEY")
-var exp = os.Getenv("JWT_EXPIRATION")
-
 func GenerateToken(userID int64) (string, error) {
+
+	var secretKey = os.Getenv("JWT_SECRET_KEY")
+	// var exp = os.Getenv("JWT_EXPIRATION")
+
 	claims := jwt.MapClaims{
 		"user_id": userID,
-		"exp":     exp, //time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
+		"exp":     time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -21,6 +23,8 @@ func GenerateToken(userID int64) (string, error) {
 
 // ParseToken parses a JWT and returns the claims
 func ParseToken(tokenString string) (jwt.MapClaims, error) {
+	var secretKey = os.Getenv("JWT_SECRET_KEY")
+
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
 	})
