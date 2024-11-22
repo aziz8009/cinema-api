@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"time"
 
 	"github.com/aziz8009/cinema-app/src/entities"
 	"github.com/aziz8009/cinema-app/src/repositories"
@@ -47,16 +48,24 @@ func (a *authService) Login(c echo.Context, req LoginRequest) (res constants.Def
 	isValid, err := utils.Decrypt([]byte(user.Password), []byte(req.Password))
 
 	if !isValid {
-		err = errors.New("invalid email or password")
+		err = errors.New(user.Password)
 		return res, err
 	}
 
-	token, err := utils.GenerateToken(user.ID)
+	token, err := utils.GenerateToken(constants.AuthData{
+		ID:    user.ID,
+		Name:  user.Name,
+		Email: user.Email,
+		Role:  user.Role,
+	})
 
 	res = constants.DefaultResponse{
 		Status:  constants.STATUS_SUCCESS,
 		Message: constants.MESSAGE_SUCCESS,
 		Data: LoginResponse{
+			Name:  user.Name,
+			Email: user.Email,
+			Role:  user.Role,
 			Token: token,
 		},
 		Errors: make([]string, 0),
@@ -67,7 +76,10 @@ func (a *authService) Login(c echo.Context, req LoginRequest) (res constants.Def
 
 func (a *authService) Register(c echo.Context, req RegisterRequest) (res constants.DefaultResponse, err error) {
 
-	ctx := c.Request().Context()
+	var (
+		ctx = c.Request().Context()
+		now = time.Now().UTC()
+	)
 	// Password Hashing
 	hashedPassword, err := utils.Encrypt(req.Password)
 	if err != nil {
@@ -86,9 +98,11 @@ func (a *authService) Register(c echo.Context, req RegisterRequest) (res constan
 	}
 
 	dataInsert := entities.User{
-		Name:     req.Name,
-		Email:    req.Email,
-		Password: string(hashedPassword),
+		Name:      req.Name,
+		Email:     req.Email,
+		Role:      req.Role,
+		Password:  string(hashedPassword),
+		CreatedAt: now,
 	}
 
 	user, err := a.userRepo.Create(ctx, dataInsert)

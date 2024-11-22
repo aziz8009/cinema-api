@@ -24,29 +24,26 @@ func RegisterRoutes(e *echo.Echo, db *sql.DB) {
 
 		admin := v1.Group("/admin", middleware.JWTMiddleware)
 		{
-			admin.GET("/movies", func(c echo.Context) error {
-				return c.String(http.StatusOK, "Get List movie api")
-			})
 
-			admin.POST("/movies", func(c echo.Context) error {
-				return c.String(http.StatusOK, "Upload movie api")
-			})
+			movie := admin.Group("/movies")
+			{
 
-			admin.PUT("/movies/:id", func(c echo.Context) error {
-				return c.String(http.StatusOK, "Update movie api")
-			})
+				movie.GET("", h.MovieHandler.GetAll)
 
-			admin.DELETE("/movies/:id", func(c echo.Context) error {
-				return c.String(http.StatusOK, "Remove movie api")
-			})
+				movie.POST("", h.MovieHandler.Create)
 
-			admin.GET("/movies/most-viewed", func(c echo.Context) error {
-				return c.String(http.StatusOK, "Get list movie most view api")
-			})
+				movie.GET("/:id", h.MovieHandler.GetDetailById)
 
-			admin.GET("/genres/most-viewed", func(c echo.Context) error {
-				return c.String(http.StatusOK, "Get list movie most view by genres api")
-			})
+				movie.PUT("/:id", h.MovieHandler.Update)
+
+				movie.DELETE("/:id", func(c echo.Context) error {
+					return c.String(http.StatusOK, "Remove movie api")
+				})
+
+				movie.GET("/most-viewed", h.MovieHandler.GetMostViewed)
+
+				movie.GET("/genres/most-viewed", h.MovieHandler.GetMostViewedByGenre)
+			}
 		}
 
 		users := v1.Group("/movies", middleware.JWTMiddleware)

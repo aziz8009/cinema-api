@@ -3,7 +3,6 @@ package repositories
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/aziz8009/cinema-app/src/entities"
@@ -25,13 +24,12 @@ func NewUserRepository(db *sql.DB) UserRepository {
 		panic("db is nil")
 	}
 
-	fmt.Println("masuk sini 1")
-
 	return &userRepository{db: db}
 }
 
 func (r *userRepository) GetAll(ctx context.Context) (res []entities.User, err error) {
-	query, args, err := sq.Select("id", "name", "email").
+
+	query, args, err := sq.Select("id", "name", "email", "role").
 		From("users").
 		ToSql()
 	if err != nil {
@@ -47,7 +45,7 @@ func (r *userRepository) GetAll(ctx context.Context) (res []entities.User, err e
 	var users []entities.User
 	for rows.Next() {
 		var user entities.User
-		if err := rows.Scan(&user.ID, &user.Name, &user.Email); err != nil {
+		if err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Role); err != nil {
 			return nil, err
 		}
 		users = append(users, user)
@@ -58,7 +56,7 @@ func (r *userRepository) GetAll(ctx context.Context) (res []entities.User, err e
 
 func (r *userRepository) GetByEmail(ctx context.Context, email string) (res entities.User, err error) {
 
-	query, args, err := sq.Select("id", "name", "email", "password").
+	query, args, err := sq.Select("id", "name", "email", "password", "role").
 		From("users").
 		Where("email = ?", email).
 		ToSql()
@@ -67,7 +65,7 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (res enti
 		return res, err
 	}
 
-	err = r.db.QueryRowContext(ctx, query, args...).Scan(&res.ID, &res.Name, &res.Email, &res.Password)
+	err = r.db.QueryRowContext(ctx, query, args...).Scan(&res.ID, &res.Name, &res.Email, &res.Password, &res.Role)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// Handle the case where no rows are found
@@ -83,8 +81,8 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (res enti
 func (r *userRepository) Create(ctx context.Context, user entities.User) (res entities.User, err error) {
 	// Prepare the SQL query to insert the user
 	query, args, err := sq.Insert("users").
-		Columns("name", "email", "password").
-		Values(user.Name, user.Email, user.Password).
+		Columns("name", "email", "password", "role").
+		Values(user.Name, user.Email, user.Password, user.Role).
 		ToSql()
 
 	if err != nil {

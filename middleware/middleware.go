@@ -43,11 +43,11 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		userAuth, err := utils.ParseToken(tokenStr)
 
 		if err != nil {
-			log.Println(ctx, "Invalid Token Format", err)
+			log.Println(ctx, "Invalid Token Format", token)
 			return c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid token"})
 		}
 
-		c.Set("user_auth", userAuth)
+		c.Set("user_auth", userAuth.Data)
 
 		return next(c)
 	}

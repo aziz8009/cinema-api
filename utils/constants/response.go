@@ -7,6 +7,13 @@ type DefaultResponse struct {
 	Errors  []string    `json:"errors"`
 }
 
+type AuthData struct {
+	ID    int64  `json:"id"` // user id
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Role  string `json:"role"`
+}
+
 const (
 	STATUS_SUCCESS        = "0000"
 	STATUS_CREATE_SUCCESS = "0001"
